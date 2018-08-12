@@ -1,10 +1,12 @@
 package mao.com.customviewgather.slide.view;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.Scroller;
 
@@ -17,9 +19,6 @@ import android.widget.Scroller;
  */
 public class ScrollerViewGroupWithGesture extends RelativeLayout {
     private static final String TAG = "maoTest";
-
-    private int startY = 0;
-    private int currentY = 0;
 
     private Scroller scroller;
     private GestureDetector gestureDetector;
@@ -41,8 +40,19 @@ public class ScrollerViewGroupWithGesture extends RelativeLayout {
     }
 
     @Override
+    protected void onDraw(Canvas canvas) {
+        Log.d(TAG, "onDraw: ");
+        super.onDraw(canvas);
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent e) {
-        return gestureDetector.onTouchEvent(e);
+        if (!gestureDetector.onTouchEvent(e) && e.getAction() == MotionEvent.ACTION_UP) {
+            int translationY = (int) getTranslationY();
+            scroller.startScroll(0, translationY, 0, -translationY, computerDuration(translationY));
+            invalidate();
+        }
+        return true;
     }
 
     @Override
@@ -50,6 +60,7 @@ public class ScrollerViewGroupWithGesture extends RelativeLayout {
         super.computeScroll();
         Log.d(TAG, "computeScroll: ");
         if (scroller.computeScrollOffset()) {
+            Log.d(TAG, "computeScroll 2: ");
             int dy = scroller.getCurrY();
             moveViewToPosition(dy);
         }
@@ -68,64 +79,38 @@ public class ScrollerViewGroupWithGesture extends RelativeLayout {
         return dy == 0 ? 0 : (int) (Math.abs(dy * 1f) / getHeight() * ANIMATION_DURATION);
     }
 
+    private void moveByDistance(int distance) {
+        int translationY = (int) getTranslationY();
+        if (Math.abs(translationY - distance) <= getHeight()) {
+            ((View) getParent()).scrollBy(0, distance);
+        } else {
+            int offset = (translationY + distance) >= 0 ? getHeight() : -getHeight() + 1;
+            setTranslationY(offset);
+        }
+        invalidate();
+    }
+
     private GestureDetector.SimpleOnGestureListener simpleOnGestureListener = new GestureDetector.SimpleOnGestureListener() {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            Log.d(TAG, "onScroll: ");
+            Log.d(TAG, "onScroll: " + (int) distanceY);
+            moveByDistance((int) distanceY);
             return true;
         }
 
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            Log.d(TAG, "onFling: ");
-            return true;
-        }
-
-        @Override
-        public void onShowPress(MotionEvent e) {
-            Log.d(TAG, "onShowPress: ");
-            super.onShowPress(e);
-        }
+//        @Override
+//        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+//            Log.d(TAG, "onFling: " + (int) velocityY);
+//            moveByDistance((int) velocityY);
+//            return true;
+//        }
 
         @Override
         public boolean onDown(MotionEvent e) {
             Log.d(TAG, "onDown: ");
-            return true;
-        }
-
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-            Log.d(TAG, "onSingleTapUp: ");
-            return true;
-        }
-
-        @Override
-        public void onLongPress(MotionEvent e) {
-            Log.d(TAG, "onLongPress: ");
-            super.onLongPress(e);
-        }
-
-        @Override
-        public boolean onDoubleTap(MotionEvent e) {
-            Log.d(TAG, "onDoubleTap: ");
-            return true;
-        }
-
-        @Override
-        public boolean onDoubleTapEvent(MotionEvent e) {
-            Log.d(TAG, "onDoubleTapEvent: ");
-            return true;
-        }
-
-        @Override
-        public boolean onSingleTapConfirmed(MotionEvent e) {
-            Log.d(TAG, "onSingleTapConfirmed: ");
-            return true;
-        }
-
-        @Override
-        public boolean onContextClick(MotionEvent e) {
-            Log.d(TAG, "onContextClick: ");
+            if (!scroller.computeScrollOffset()) {
+                scroller.forceFinished(true);
+            }
             return true;
         }
     };

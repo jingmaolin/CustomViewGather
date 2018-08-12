@@ -6,9 +6,16 @@
     android:background="#E1E1E1"
     tools:context=".MainActivity">
 
-    <mao.com.customviewgather.slide.view.ScrollerViewGroup
+    <mao.com.customviewgather.slide.view.ScrollerViewGroupWithGesture
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#2d2" />
+        android:background="#2d2">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="hahahahahha"
+            android:textSize="20dp" />
+    </mao.com.customviewgather.slide.view.ScrollerViewGroupWithGesture>
 
 </LinearLayout>
