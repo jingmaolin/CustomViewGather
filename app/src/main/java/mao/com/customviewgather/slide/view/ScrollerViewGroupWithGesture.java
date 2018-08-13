@@ -1,7 +1,6 @@
 package mao.com.customviewgather.slide.view;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -9,8 +8,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.Scroller;
-
-import java.io.File;
 
 /**
  * Description:简单的使用Scroller + Gesture模拟下拉滑動
@@ -42,14 +39,9 @@ public class ScrollerViewGroupWithGesture extends RelativeLayout {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
-        Log.d(TAG, "onDraw: ");
-        super.onDraw(canvas);
-    }
-
-    @Override
     public boolean onTouchEvent(MotionEvent e) {
         if (!gestureDetector.onTouchEvent(e) && e.getAction() == MotionEvent.ACTION_UP) {
+            lastY = 0;
             int scrollY = ((View) getParent()).getScrollY();
             scroller.startScroll(0, scrollY, 0, -scrollY, computerDuration(scrollY));
             invalidate();
@@ -76,29 +68,44 @@ public class ScrollerViewGroupWithGesture extends RelativeLayout {
         return dy == 0 ? 0 : (int) (Math.abs(dy * 1f) / getHeight() * ANIMATION_DURATION);
     }
 
-    private void moveByDistance(int distance) {
-//        int translationY = (int) getTranslationY();
-//        if (Math.abs(translationY - distance) <= getHeight()) {
-//            ((View) getParent()).scrollBy(0, distance);
-//        } else {
-//            int offset = (translationY + distance) >= 0 ? getHeight() : -getHeight() + 1;
-//            setTranslationY(offset);
-//        }
-        ((View) getParent()).scrollBy(0, distance);
+    private void moveByDistance(int dy) {
+        int scrollY = ((View) getParent()).getScrollY();
+        int distance = dy + scrollY;
+        if (Math.abs(distance) < getHeight()) {
+            ((View) getParent()).scrollBy(0, dy);
+        } else {
+            //加1或者减是防止视图完全滑出，进而导致computeScroll不会被调用
+            int offset = distance >= 0 ? getHeight() - 1 : -getHeight() + 1;
+            ((View) getParent()).scrollTo(0, offset);
+        }
     }
 
+    private int lastY = 0;
+
+
+    /**
+     * onScroll scrollBy scrollTo 中的屏幕滑动的值与x、y轴上对应的差值互为相反数
+     */
     private GestureDetector.SimpleOnGestureListener simpleOnGestureListener = new GestureDetector.SimpleOnGestureListener() {
         @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) { //TODO 向下滑动 distanceY 的值一会为正一会为负
+            Log.d(TAG, "onScroll: e2 = " + e2.getRawY());
             Log.d(TAG, "onScroll: " + (int) distanceY);
-            moveByDistance((int) distanceY);
+
+            //计算前后两个move事件的差值
+            if (lastY == 0) {
+                moveByDistance((int) -(e2.getRawY() - e1.getRawY()));
+            } else {
+                moveByDistance((int) -(e2.getRawY() - lastY));
+            }
+            lastY = (int) e2.getRawY();
             return true;
         }
 
         @Override
         public boolean onDown(MotionEvent e) {
             Log.d(TAG, "onDown: ");
-            if (!scroller.computeScrollOffset()) {
+            if (scroller.computeScrollOffset()) {
                 scroller.forceFinished(true);
             }
             return true;

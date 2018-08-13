@@ -9,8 +9,9 @@ import android.widget.Scroller;
 
 /**
  * Description:简单的使用Scroller模拟下拉滑動。此处使用的是setTranslationY来设置新的位置，
- * ①不好的地方是当滑动一定到位置松开然后再立刻继续滑动时，若此时currentY-startY 与当前view的translationY不同，则会有一瞬间的错位效果，
- * 解决该问题的大致思路是 在currentY-startY 的基础上加上当前的与当前view的translationY的位移
+ * ①之前是用currentY-startY直接作为偏移量，不好的地方是当滑动一定到位置松开然后再立刻继续滑动时，
+ * 若此时currentY-startY 与当前view的translationY不同，则会有一瞬间的错位效果，
+ * 解决该问题的大致思路是 在每次move事件之后startY都更新，偏移量 =（currentY-startY）+ 当前的偏移量
  * ②视图滑动至view之外后，computeScroll方法不会被调用
  * author:jingmaolin
  * email:1271799407@qq.com.
@@ -43,16 +44,19 @@ public class ScrollerViewGroup extends RelativeLayout {
     public boolean onTouchEvent(MotionEvent e) {
         switch (e.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                if (scroller.computeScrollOffset()) {
+                    scroller.forceFinished(true);
+                }
                 startY = (int) e.getRawY();
                 Log.d(TAG, "onTouchEvent: getRawY= " + e.getRawY());
                 Log.d(TAG, "onTouchEvent: " + getHeight());
                 break;
             case MotionEvent.ACTION_MOVE:
                 currentY = (int) e.getRawY();
-                int distance = currentY - startY;
-                Log.d(TAG, "onTouchEvent: distance = " + distance);
+                int dy = currentY - startY;
+                int distance = (int) (getTranslationY() + dy);
                 //当滑动的距离超过屏幕的高度时，computeScroll不会被调用
-                if (Math.abs(distance) <= getHeight()) {
+                if (Math.abs(distance) < getHeight()) {
                     setTranslationY(distance);
                 } else {
                     //当底部下滑位移完全为屏幕高度时仍正常恢复原样，但顶部需要略小于屏幕高度，否则滑动到顶部时向下拖动无反应
@@ -61,11 +65,12 @@ public class ScrollerViewGroup extends RelativeLayout {
                     Log.d(TAG, "onTouchEvent: result offset=" + offset);
                     setTranslationY(offset);
                 }
+                startY = currentY;
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
-                int dy = (int) getTranslationY();
-                scroller.startScroll(0, dy, 0, -dy, computerDuration(dy));
+                int translationY = (int) getTranslationY();
+                scroller.startScroll(0, translationY, 0, -translationY, computerDuration(translationY));
                 invalidate();
                 break;
         }

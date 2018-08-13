@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 /**
- * Description ：scrollTo,scrollBy,getTranslations,getX,getRawX,getScrollY等
+ * Description ：用于scrollTo,scrollBy,getTranslations,getX,getRawX,getScrollY等测试使用
  * Created by jingmaolin on 2018/8/13.
  */
 
@@ -38,25 +38,34 @@ public class MoveWaysOfView extends RelativeLayout {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-//                getXAndRawX(event);
-//                getTranslations();
-//
-//                setTranslationY(10 * getResources().getDisplayMetrics().density);
-//
-//                getXAndRawX(event);
-//                getTranslations();
-//
-//                scrollBy(0, (int) (10 * getResources().getDisplayMetrics().density));
-//
-//                getTranslations();
-
-                Log.d(TAG, "parent scrollY: " + ((View) getParent()).getScrollY());
-                ((View) getParent()).scrollBy(0, (int) (5 * getResources().getDisplayMetrics().density));
+                //one
+                getXAndRawX(event);
                 getTranslations();
 
-                Log.d(TAG, "parent scrollY: " + ((View) getParent()).getScrollY());
+                setTranslationY(getTranslationY() + 10 * getResources().getDisplayMetrics().density);
+
+                getXAndRawX(event);
+                getTranslations();
+
+                //two
+//                scrollBy(0, (int) (10 * getResources().getDisplayMetrics().density));
+//                getTranslations();
+
+                //three
+//                Log.d(TAG, "parent scrollY: " + ((View) getParent()).getScrollY());
+//                ((View) getParent()).scrollBy(0, (int) (5 * getResources().getDisplayMetrics().density));
+//                getTranslations();
+//                Log.d(TAG, "parent scrollY: " + ((View) getParent()).getScrollY());
+
+                //four
+//                Log.d(TAG, "parent scrollY: " + ((View) getParent()).getScrollY());
+//                Log.d(TAG, "child scrollY: " + getScrollY());
+//                setTranslationY(10 * getResources().getDisplayMetrics().density);
+//                Log.d(TAG, "child scrollY: " + getScrollY());
+//                Log.d(TAG, "parent scrollY: " + ((View) getParent()).getScrollY());
                 break;
         }
+        invalidate();
         return true;
     }
 
