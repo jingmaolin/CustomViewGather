@@ -10,6 +10,12 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="moveViewWays"
+        android:text="视图滑动方式" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:onClick="scroller_move"
         android:text="Scroller模拟视图下滑" />
 

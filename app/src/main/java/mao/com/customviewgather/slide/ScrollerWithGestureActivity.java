@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import mao.com.customviewgather.R;
 
 /**
- * Description: 视图下拉滑动
+ * Description: 视图下拉滑动（使用手势滑动）
  * author:jingmaolin
  * email:1271799407@qq.com.
  * phone:13342446520.

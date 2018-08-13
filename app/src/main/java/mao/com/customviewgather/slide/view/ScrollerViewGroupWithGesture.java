@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.Scroller;
 
+import java.io.File;
+
 /**
  * Description:简单的使用Scroller + Gesture模拟下拉滑動
  * author:jingmaolin
@@ -48,8 +50,8 @@ public class ScrollerViewGroupWithGesture extends RelativeLayout {
     @Override
     public boolean onTouchEvent(MotionEvent e) {
         if (!gestureDetector.onTouchEvent(e) && e.getAction() == MotionEvent.ACTION_UP) {
-            int translationY = (int) getTranslationY();
-            scroller.startScroll(0, translationY, 0, -translationY, computerDuration(translationY));
+            int scrollY = ((View) getParent()).getScrollY();
+            scroller.startScroll(0, scrollY, 0, -scrollY, computerDuration(scrollY));
             invalidate();
         }
         return true;
@@ -58,17 +60,12 @@ public class ScrollerViewGroupWithGesture extends RelativeLayout {
     @Override
     public void computeScroll() {
         super.computeScroll();
-        Log.d(TAG, "computeScroll: ");
         if (scroller.computeScrollOffset()) {
-            Log.d(TAG, "computeScroll 2: ");
+            Log.d(TAG, "computeScroll: ");
             int dy = scroller.getCurrY();
-            moveViewToPosition(dy);
+            ((View) getParent()).scrollTo(0, dy);
+            invalidate();
         }
-    }
-
-    private void moveViewToPosition(int dy) {
-        setTranslationY(dy);
-        invalidate();
     }
 
     /**
@@ -80,14 +77,14 @@ public class ScrollerViewGroupWithGesture extends RelativeLayout {
     }
 
     private void moveByDistance(int distance) {
-        int translationY = (int) getTranslationY();
-        if (Math.abs(translationY - distance) <= getHeight()) {
-            ((View) getParent()).scrollBy(0, distance);
-        } else {
-            int offset = (translationY + distance) >= 0 ? getHeight() : -getHeight() + 1;
-            setTranslationY(offset);
-        }
-        invalidate();
+//        int translationY = (int) getTranslationY();
+//        if (Math.abs(translationY - distance) <= getHeight()) {
+//            ((View) getParent()).scrollBy(0, distance);
+//        } else {
+//            int offset = (translationY + distance) >= 0 ? getHeight() : -getHeight() + 1;
+//            setTranslationY(offset);
+//        }
+        ((View) getParent()).scrollBy(0, distance);
     }
 
     private GestureDetector.SimpleOnGestureListener simpleOnGestureListener = new GestureDetector.SimpleOnGestureListener() {
@@ -97,13 +94,6 @@ public class ScrollerViewGroupWithGesture extends RelativeLayout {
             moveByDistance((int) distanceY);
             return true;
         }
-
-//        @Override
-//        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-//            Log.d(TAG, "onFling: " + (int) velocityY);
-//            moveByDistance((int) velocityY);
-//            return true;
-//        }
 
         @Override
         public boolean onDown(MotionEvent e) {

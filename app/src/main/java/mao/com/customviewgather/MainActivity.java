@@ -5,9 +5,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import mao.com.customviewgather.base.MoveWaysActivity;
 import mao.com.customviewgather.slide.ScrollerActivity;
 import mao.com.customviewgather.slide.ScrollerWithGestureActivity;
-import mao.com.customviewgather.slide.view.ScrollerViewGroupWithGesture;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -15,6 +15,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    }
+
+    public void moveViewWays(View v) {
+        startActivity(new Intent(this, MoveWaysActivity.class));
     }
 
     public void scroller_move(View v) {
